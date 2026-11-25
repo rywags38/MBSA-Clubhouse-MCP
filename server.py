@@ -79,10 +79,20 @@ async def _get(path: str, params: dict[str, Any] | None = None, auth: bool = Tru
         return {"error": "Not found."}
     if resp.status_code >= 400:
         return {"error": f"Clubhouse returned HTTP {resp.status_code}."}
+    if not resp.content.strip():
+        return {"count": 0, "items": [], "note": "Nothing found."}
     try:
-        return resp.json()
+        data = resp.json()
     except ValueError:
         return {"error": "The Clubhouse sent back something that isn't JSON."}
+    # A bare list reaches Claude as one block per item, so an empty list shows as
+    # no output at all. Wrap lists so "nothing found" is explicit.
+    if isinstance(data, list):
+        out: dict[str, Any] = {"count": len(data), "items": data}
+        if not data:
+            out["note"] = "Nothing found."
+        return out
+    return data
 
 
 # ---- My stuff -------------------------------------------------------------
