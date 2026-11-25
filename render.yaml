@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: mbsa-clubhouse-mcp
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: CONCORDA_TOKEN
+        sync: false
+      - key: SERVER_SECRET
+        generateValue: true
